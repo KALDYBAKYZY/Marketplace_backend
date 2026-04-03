@@ -14,6 +14,11 @@ func CreateUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	var existing models.User
+	if err := database.DB.Where("email = ?", user.Email).First(&existing).Error; err == nil {
+		c.JSON(http.StatusConflict, gin.H{"error": "User with this email already exists"})
+		return
+	}
 	database.DB.Create(&user)
 	c.JSON(http.StatusCreated, user)
 }

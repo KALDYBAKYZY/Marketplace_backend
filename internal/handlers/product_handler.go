@@ -14,7 +14,15 @@ func CreateProduct(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	database.DB.Create(&product)
+	if err := database.DB.Create(&product).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	var category models.Category
+	if err := database.DB.First(&category, product.CategoryID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Category not found"})
+		return
+	}
 	c.JSON(http.StatusCreated, product)
 }
 
@@ -40,6 +48,11 @@ func UpdateProduct(c *gin.Context) {
 		return
 	}
 	c.ShouldBindJSON(&product)
+	var category models.Category
+	if err := database.DB.First(&category, product.CategoryID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Category not found"})
+		return
+	}
 	database.DB.Save(&product)
 	c.JSON(http.StatusOK, product)
 }

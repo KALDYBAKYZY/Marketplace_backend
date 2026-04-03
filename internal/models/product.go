@@ -5,5 +5,5 @@ type Product struct {
 	Name       string
 	Price      float64
 	Stock      int
-	CategoryID uint
+	CategoryID uint `json:"category_id"`
 }

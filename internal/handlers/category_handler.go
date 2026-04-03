@@ -14,6 +14,11 @@ func CreateCategory(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	var existing models.Category
+	if err := database.DB.Where("name = ?", category.Name).First(&existing).Error; err == nil {
+		c.JSON(http.StatusConflict, gin.H{"error": "Category with this name already exists"})
+		return
+	}
 	database.DB.Create(&category)
 	c.JSON(http.StatusCreated, category)
 }

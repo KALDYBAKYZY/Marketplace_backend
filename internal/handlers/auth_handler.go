@@ -11,8 +11,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-var jwtSecret = []byte("secret")
-
 func Register(c *gin.Context) {
 	var user models.User
 	if err := c.ShouldBindJSON(&user); err != nil {
@@ -30,7 +28,6 @@ func Register(c *gin.Context) {
 		return
 	}
 	user.Password = string(hashedPassword)
-
 	database.DB.Create(&user)
 	c.JSON(http.StatusCreated, gin.H{"message": "User registered successfully"})
 }
@@ -41,8 +38,6 @@ func Login(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
-	// ищем пользователя
 	var user models.User
 	if err := database.DB.Where("email = ?", input.Email).First(&user).Error; err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid email or password"})
@@ -56,8 +51,6 @@ func Login(c *gin.Context) {
 		"username": user.Name,
 		"exp":      time.Now().Add(time.Hour * 1).Unix(),
 	})
-
 	tokenString, _ := token.SignedString([]byte("secret"))
-
 	c.JSON(http.StatusOK, gin.H{"token": tokenString})
 }

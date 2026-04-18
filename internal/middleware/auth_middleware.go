@@ -15,17 +15,14 @@ func AuthMiddleware() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-
 		token, err := jwt.Parse(authHeader, func(token *jwt.Token) (interface{}, error) {
 			return []byte("secret"), nil
 		})
-
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
 			c.Abort()
 			return
 		}
-
 		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 			c.Set("username", claims["username"])
 			c.Next()
